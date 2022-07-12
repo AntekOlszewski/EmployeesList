@@ -10,7 +10,10 @@
       Title="EmployeesPage">
 
     <Grid>
-        <Button Command="{Binding LoadCommand}" Content="Load" Width="100" Height="25" VerticalAlignment="Top"/>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
+            <Button Command="{Binding LoadCommand}" Content="Load" Width="100" Height="25"/>
+            <Button Command="{Binding DeleteCommand}" Content="Delete" Width="100" Height="25"/>
+        </StackPanel>
         <ListView x:Name="EmployeeListView" ItemsSource="{Binding EmployeesList}" SelectedItem="{Binding EmployeeSelected}" Margin="0 30 0 0" >
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="MouseDoubleClick">
@@ -26,6 +29,16 @@
                     <GridViewColumn Header="surename" Width="150" DisplayMemberBinding="{Binding Path=Surename}"/>
                     <GridViewColumn Header="email" Width="200" DisplayMemberBinding="{Binding Path=Email}"/>
                     <GridViewColumn Header="phone" Width="200" DisplayMemberBinding="{Binding Path=Phonenumber}"/>
+                    <GridViewColumn Width="40">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <CheckBox IsChecked="{Binding Path=IsChecked}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
                 </GridView>
             </ListView.View>
         </ListView>

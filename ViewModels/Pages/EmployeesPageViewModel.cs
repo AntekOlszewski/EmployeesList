@@ -12,14 +12,16 @@ namespace EmployeesList
         public ObservableCollection<EmployeeViewModel> EmployeesList { get; set; } = new ObservableCollection<EmployeeViewModel>();
         public ICommand LoadCommand { get; set; }
         public ICommand EditCommand { get; set; }
+        public ICommand DeleteCommand { get; set; }
         public EmployeeViewModel? EmployeeSelected { get; set; }
 
         public EmployeesPageViewModel()
         {
             LoadCommand = new RelayCommand(LoadEmployeesFromCSV);
             EditCommand = new RelayCommand(EditEmployee);
+            DeleteCommand = new RelayCommand(DeleteEmployees);
 
-            foreach(var e in DataBaseLocator.Database.Employees.ToList())
+            foreach (var e in DataBaseLocator.Database.Employees.ToList())
             {
                 EmployeesList.Add(new EmployeeViewModel(e.Id, e.Name, e.Surename, e.Email, e.Phonenumber));
             }
@@ -77,6 +79,20 @@ namespace EmployeesList
                     edit.Show();
                 }
             }
+        }
+
+        public void DeleteEmployees()
+        {
+            foreach(EmployeeViewModel e in EmployeesList.Where(e => e.IsChecked == true).ToList())
+            {
+                EmployeesList.Remove(e);
+                var foundEntity = DataBaseLocator.Database.Employees.FirstOrDefault(emp => emp.Id == e.Id);
+                if(foundEntity != null)
+                {
+                    DataBaseLocator.Database.Employees.Remove(foundEntity);
+                }
+            }
+            DataBaseLocator.Database.SaveChanges();
         }
     }
 }

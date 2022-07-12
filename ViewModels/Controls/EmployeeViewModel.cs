@@ -11,6 +11,7 @@ namespace EmployeesList
         private string surename = String.Empty;
         private string email = String.Empty;
         private string phonenumber = String.Empty;
+        private bool isChecked = false;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -91,6 +92,12 @@ namespace EmployeesList
                     NotifyPropertyChanged();
                 }
             }
+        }
+
+        public bool IsChecked
+        {
+            get { return isChecked; }
+            set { isChecked = value; }
         }
     }
 }
