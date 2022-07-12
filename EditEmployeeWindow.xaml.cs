@@ -2,9 +2,9 @@
 
 namespace EmployeesList
 {
-    public partial class Edit : Window
+    public partial class EditEmployeeWindow : Window
     {
-        public Edit(EmployeeViewModel employee)
+        public EditEmployeeWindow(EmployeeViewModel employee)
         {
             InitializeComponent();
             DataContext = new EditEmployeePageViewModel(employee, this);

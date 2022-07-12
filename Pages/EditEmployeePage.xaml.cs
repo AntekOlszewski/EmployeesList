@@ -2,9 +2,9 @@
 
 namespace EmployeesList
 {
-    public partial class EditPage : Page
+    public partial class EditEmployeePage : Page
     {
-        public EditPage()
+        public EditEmployeePage()
         {
             InitializeComponent();
         }

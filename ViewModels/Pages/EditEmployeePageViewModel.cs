@@ -11,8 +11,8 @@ namespace EmployeesList
         public string Email { get; set; }
         public string Phonenumber { get; set; }
         public ICommand SaveCommand { get; set; }
-        private Edit editWindow { get; set; }
-        public EditEmployeePageViewModel(EmployeeViewModel EmployeeToEdit, Edit edit)
+        private EditEmployeeWindow editWindow { get; set; }
+        public EditEmployeePageViewModel(EmployeeViewModel EmployeeToEdit, EditEmployeeWindow edit)
         {
             Employee = EmployeeToEdit;
             Name = EmployeeToEdit.Name;

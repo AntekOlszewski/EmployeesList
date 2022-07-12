@@ -13,6 +13,7 @@ namespace EmployeesList
         public ICommand LoadCommand { get; set; }
         public ICommand EditCommand { get; set; }
         public ICommand DeleteCommand { get; set; }
+        public ICommand AddCommand { get; set; }
         public EmployeeViewModel? EmployeeSelected { get; set; }
 
         public EmployeesPageViewModel()
@@ -20,6 +21,7 @@ namespace EmployeesList
             LoadCommand = new RelayCommand(LoadEmployeesFromCSV);
             EditCommand = new RelayCommand(EditEmployee);
             DeleteCommand = new RelayCommand(DeleteEmployees);
+            AddCommand = new RelayCommand(AddEmployee);
 
             foreach (var e in DataBaseLocator.Database.Employees.ToList())
             {
@@ -75,7 +77,7 @@ namespace EmployeesList
                 var EmployeeToEdit = EmployeesList.FirstOrDefault(e => e.Id == EmployeeSelected.Id);
                 if (EmployeeToEdit != null)
                 {
-                    Edit edit = new Edit(EmployeeToEdit);
+                    EditEmployeeWindow edit = new EditEmployeeWindow(EmployeeToEdit);
                     edit.Show();
                 }
             }
@@ -93,6 +95,12 @@ namespace EmployeesList
                 }
             }
             DataBaseLocator.Database.SaveChanges();
+        }
+
+        public void AddEmployee()
+        {
+            AddEmployeeWindow add = new AddEmployeeWindow(EmployeesList);
+            add.Show();
         }
     }
 }
