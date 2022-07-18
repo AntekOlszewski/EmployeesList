@@ -3,6 +3,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows.Input;
 
 namespace EmployeesList
@@ -14,6 +15,7 @@ namespace EmployeesList
         public ICommand EditCommand { get; set; }
         public ICommand DeleteCommand { get; set; }
         public ICommand AddCommand { get; set; }
+        public ICommand ExportCommand { get; set; }
         public EmployeeViewModel? EmployeeSelected { get; set; }
 
         public EmployeesPageViewModel()
@@ -22,6 +24,7 @@ namespace EmployeesList
             EditCommand = new RelayCommand(EditEmployee);
             DeleteCommand = new RelayCommand(DeleteEmployees);
             AddCommand = new RelayCommand(AddEmployee);
+            ExportCommand = new RelayCommand(ExportData);
 
             foreach (var e in DataBaseLocator.Database.Employees.ToList())
             {
@@ -101,6 +104,24 @@ namespace EmployeesList
         {
             AddEmployeeWindow add = new AddEmployeeWindow(EmployeesList);
             add.Show();
+        }
+
+        public void ExportData()
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Csv file (*.csv)|*.csv";
+            StringBuilder csv = new StringBuilder();
+            csv.Append("id,name,surename,email,phone\n");
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                foreach (EmployeeViewModel e in EmployeesList)
+                {
+                    csv.Append(Convert.ToString(e.Id) + ',' + e.Name + ',' + e.Surename + ',' + e.Email + ',' + e.Phonenumber + '\n');
+                }
+                File.WriteAllText(saveFileDialog.FileName, csv.ToString());
+            }
+                
         }
     }
 }

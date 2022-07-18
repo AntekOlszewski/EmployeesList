@@ -12,6 +12,7 @@
     <Grid>
         <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
             <Button Command="{Binding LoadCommand}" Content="Load" Width="100" Height="25"/>
+            <Button Command="{Binding ExportCommand}" Content="Export" Width="100" Height="25"/>
             <Button Command="{Binding AddCommand}" Content="Add" Width="100" Height="25"/>
             <Button Command="{Binding DeleteCommand}" Content="Delete" Width="100" Height="25"/>
         </StackPanel>
