@@ -97,7 +97,14 @@ namespace EmployeesList
         public bool IsChecked
         {
             get { return isChecked; }
-            set { isChecked = value; }
+            set 
+            { 
+                if (value != isChecked)
+                {
+                    isChecked = value;
+                    NotifyPropertyChanged();
+                }
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Windows;
 using System.Windows.Input;
 
 namespace EmployeesList
@@ -16,8 +17,14 @@ namespace EmployeesList
         public ICommand DeleteCommand { get; set; }
         public ICommand AddCommand { get; set; }
         public ICommand ExportCommand { get; set; }
-        public EmployeeViewModel? EmployeeSelected { get; set; }
+        public ICommand CheckAllCommand { get; set; }
+        public ICommand SortCommand { get; set; }
 
+        public EmployeeViewModel? EmployeeSelected { get; set; }
+        public bool IsCheckedAll { get; set; }
+        private enum Column { ID, Name, Surename, Email, Phonenumber}
+        private Column sortBy = Column.ID;
+        private bool sortAscending = true;
         public EmployeesPageViewModel()
         {
             LoadCommand = new RelayCommand(LoadEmployeesFromCSV);
@@ -25,6 +32,8 @@ namespace EmployeesList
             DeleteCommand = new RelayCommand(DeleteEmployees);
             AddCommand = new RelayCommand(AddEmployee);
             ExportCommand = new RelayCommand(ExportData);
+            CheckAllCommand = new RelayCommand(CheckAll);
+            SortCommand = new RelayCommand(parameter => SortByColumn((string)parameter));
 
             foreach (var e in DataBaseLocator.Database.Employees.ToList())
             {
@@ -115,13 +124,138 @@ namespace EmployeesList
 
             if (saveFileDialog.ShowDialog() == true)
             {
-                foreach (EmployeeViewModel e in EmployeesList)
+                ObservableCollection<EmployeeViewModel> exportedEmployees = new ObservableCollection<EmployeeViewModel>();
+                if(sortBy != Column.ID || !sortAscending)
+                {
+                    exportedEmployees = new ObservableCollection<EmployeeViewModel>(EmployeesList.OrderBy(e => e.Id));
+                }
+                else
+                {
+                    exportedEmployees = EmployeesList;
+                }
+                foreach (EmployeeViewModel e in exportedEmployees)
                 {
                     csv.Append(Convert.ToString(e.Id) + ',' + e.Name + ',' + e.Surename + ',' + e.Email + ',' + e.Phonenumber + '\n');
                 }
                 File.WriteAllText(saveFileDialog.FileName, csv.ToString());
             }
                 
+        }
+
+        private void CheckAll()
+        {
+            foreach(EmployeeViewModel e in EmployeesList)
+            {
+                e.IsChecked = IsCheckedAll;
+            }
+        }
+
+        private void SortByColumn(string name)
+        {
+            ObservableCollection<EmployeeViewModel> temp = new ObservableCollection<EmployeeViewModel>();
+            switch (name)
+            {
+                case "ID":
+                    if(sortBy == Column.ID)
+                    {
+                        sortAscending = !sortAscending;
+                    }
+                    else
+                    {
+                        sortAscending = true;
+                    }
+                    sortBy = Column.ID;
+                    if (sortAscending)
+                    {
+                        temp = new ObservableCollection<EmployeeViewModel>(EmployeesList.OrderBy(e => e.Id));
+                    }
+                    else
+                    {
+                        temp = new ObservableCollection<EmployeeViewModel>(EmployeesList.OrderByDescending(e => e.Id));
+                    }
+                    break;
+                case "Name":
+                    if (sortBy == Column.Name)
+                    {
+                        sortAscending = !sortAscending;
+                    }
+                    else
+                    {
+                        sortAscending = true;
+                    }
+                    sortBy = Column.Name;
+                    if (sortAscending)
+                    {
+                        temp = new ObservableCollection<EmployeeViewModel>(EmployeesList.OrderBy(e => e.Name));
+                    }
+                    else
+                    {
+                        temp = new ObservableCollection<EmployeeViewModel>(EmployeesList.OrderByDescending(e => e.Name));
+                    }
+                    break;
+                case "Surename":
+                    if (sortBy == Column.Surename)
+                    {
+                        sortAscending = !sortAscending;
+                    }
+                    else
+                    {
+                        sortAscending = true;
+                    }
+                    sortBy = Column.Surename;
+                    if (sortAscending)
+                    {
+                        temp = new ObservableCollection<EmployeeViewModel>(EmployeesList.OrderBy(e => e.Surename));
+                    }
+                    else
+                    {
+                        temp = new ObservableCollection<EmployeeViewModel>(EmployeesList.OrderByDescending(e => e.Surename));
+                    }
+                    break;
+                case "Email":
+                    if (sortBy == Column.Email)
+                    {
+                        sortAscending = !sortAscending;
+                    }
+                    else
+                    {
+                        sortAscending = true;
+                    }
+                    sortBy = Column.Email;
+                    if (sortAscending)
+                    {
+                        temp = new ObservableCollection<EmployeeViewModel>(EmployeesList.OrderBy(e => e.Email));
+                    }
+                    else
+                    {
+                        temp = new ObservableCollection<EmployeeViewModel>(EmployeesList.OrderByDescending(e => e.Email));
+                    }
+                    break;
+                case "Phonenumber":
+                    if (sortBy == Column.Phonenumber)
+                    {
+                        sortAscending = !sortAscending;
+                    }
+                    else
+                    {
+                        sortAscending = true;
+                    }
+                    sortBy = Column.Phonenumber;
+                    if (sortAscending)
+                    {
+                        temp = new ObservableCollection<EmployeeViewModel>(EmployeesList.OrderBy(e => e.Phonenumber));
+                    }
+                    else
+                    {
+                        temp = new ObservableCollection<EmployeeViewModel>(EmployeesList.OrderByDescending(e => e.Phonenumber));
+                    }
+                    break;
+            }
+            EmployeesList.Clear();
+            foreach (EmployeeViewModel e in temp)
+            {
+                EmployeesList.Add(e);
+            } 
         }
     }
 }

@@ -4,7 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-      xmlns:local="clr-namespace:EmployeesList"
+      xmlns:local="clr-namespace:EmployeesList" d:DataContext="{d:DesignInstance Type=local:EmployeesPageViewModel}"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="EmployeesPage">
@@ -26,12 +26,75 @@
             </i:Interaction.Triggers>
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="ID" Width="40" DisplayMemberBinding="{Binding Path=Id}"/>
-                    <GridViewColumn Header="name" Width="100" DisplayMemberBinding="{Binding Path=Name}"/>
-                    <GridViewColumn Header="surename" Width="150" DisplayMemberBinding="{Binding Path=Surename}"/>
-                    <GridViewColumn Header="email" Width="200" DisplayMemberBinding="{Binding Path=Email}"/>
-                    <GridViewColumn Header="phone" Width="200" DisplayMemberBinding="{Binding Path=Phonenumber}"/>
+                    <GridViewColumn Width="40" DisplayMemberBinding="{Binding Path=Id}">
+                        <GridViewColumn.Header>
+                            <GridViewColumnHeader Content="ID">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Click">
+                                        <i:InvokeCommandAction Command="{Binding SortCommand}" CommandParameter="ID"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </GridViewColumnHeader>
+                        </GridViewColumn.Header>
+                    </GridViewColumn>
+                    <GridViewColumn Width="100" DisplayMemberBinding="{Binding Path=Name}">
+                        <GridViewColumn.Header>
+                            <GridViewColumnHeader Content="name">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Click">
+                                        <i:InvokeCommandAction Command="{Binding SortCommand}" CommandParameter="Name"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </GridViewColumnHeader>
+                        </GridViewColumn.Header>
+                    </GridViewColumn>
+                    <GridViewColumn Width="150" DisplayMemberBinding="{Binding Path=Surename}">
+                        <GridViewColumn.Header>
+                            <GridViewColumnHeader Content="surename">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Click">
+                                        <i:InvokeCommandAction Command="{Binding SortCommand}" CommandParameter="Surename"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </GridViewColumnHeader>
+                        </GridViewColumn.Header>
+                    </GridViewColumn>
+                    <GridViewColumn Width="200" DisplayMemberBinding="{Binding Path=Email}">
+                        <GridViewColumn.Header>
+                            <GridViewColumnHeader Content="email">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Click">
+                                        <i:InvokeCommandAction Command="{Binding SortCommand}" CommandParameter="Email"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </GridViewColumnHeader>
+                        </GridViewColumn.Header>
+                    </GridViewColumn>
+                    <GridViewColumn Width="200" DisplayMemberBinding="{Binding Path=Phonenumber}">
+                        <GridViewColumn.Header>
+                            <GridViewColumnHeader Content="phone">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Click">
+                                        <i:InvokeCommandAction Command="{Binding SortCommand}" CommandParameter="Phonenumber"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </GridViewColumnHeader>
+                        </GridViewColumn.Header>
+                    </GridViewColumn>
                     <GridViewColumn Width="40">
+                        <GridViewColumn.Header>
+                            <CheckBox IsChecked="{Binding IsCheckedAll}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Checked">
+                                        <i:InvokeCommandAction Command="{Binding CheckAllCommand}"/>
+                                    </i:EventTrigger>
+
+                                    <i:EventTrigger EventName="Unchecked">
+                                        <i:InvokeCommandAction Command="{Binding CheckAllCommand}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </CheckBox>
+                        </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel>
