@@ -1,10 +1,14 @@
 ﻿using Microsoft.Win32;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace EmployeesList
@@ -27,9 +31,9 @@ namespace EmployeesList
         private bool sortAscending = true;
         public EmployeesPageViewModel()
         {
-            LoadCommand = new RelayCommand(LoadEmployeesFromCSV);
+            LoadCommand = new RelayCommand(LoadEmployeesFromCSVAsync);
             EditCommand = new RelayCommand(EditEmployee);
-            DeleteCommand = new RelayCommand(DeleteEmployees);
+            DeleteCommand = new RelayCommand(DeleteEmployeesAsync);
             AddCommand = new RelayCommand(AddEmployee);
             ExportCommand = new RelayCommand(ExportData);
             CheckAllCommand = new RelayCommand(CheckAll);
@@ -37,10 +41,12 @@ namespace EmployeesList
 
             foreach (var e in DataBaseLocator.Database.Employees.ToList())
             {
-                EmployeesList.Add(new EmployeeViewModel(e.Id, e.Name, e.Surename, e.Email, e.Phonenumber));
+                EmployeeViewModel Employee = new EmployeeViewModel(e.Id, e.Name, e.Surename, e.Email, e.Phonenumber);
+                BindingOperations.EnableCollectionSynchronization(EmployeesList, Employee);
+                Task.Run(() => EmployeesList.Add(Employee));
             }
         }
-        private void LoadEmployeesFromCSV()
+        private async void LoadEmployeesFromCSVAsync()
         {
             var dialog = new OpenFileDialog { };
             dialog.Filter = "Csv files (*.csv)|*.csv";
@@ -50,36 +56,42 @@ namespace EmployeesList
 
             if(path != "") 
             {
-                ReadCSV(path);
+                await ReadCSVAsync(path);
             }
         }
-        public void ReadCSV(string path)
+        public async Task ReadCSVAsync(string path)
         {
 
-            string[] lines = File.ReadAllLines(path);
+            string[] lines = await File.ReadAllLinesAsync(path);
+            List<Task> tasks = new List<Task>();
 
-            for(int i = 1; i < lines.Length; i++)
+            foreach (string line in lines.Skip(1))
             {
-                string[] data = lines[i].Split(',');
+                string[] data = line.Split(',');
 
                 var e = EmployeesList.FirstOrDefault(e => e.Id == Convert.ToInt32(data[0]));
 
                 if(e == null)
                 {
-                    EmployeesList.Add(new EmployeeViewModel(Convert.ToInt32(data[0]), data[1], data[2], data[3], data[4]));
-                    DataBaseLocator.Database.Employees.Add(new DataBase.Employee
+                    EmployeeViewModel newEmployee = new EmployeeViewModel(Convert.ToInt32(data[0]), data[1], data[2], data[3], data[4]);
+                    BindingOperations.EnableCollectionSynchronization(EmployeesList, newEmployee);
+
+                    tasks.Add(Task.Run(() => EmployeesList.Add(newEmployee)));
+                    
+                    await DataBaseLocator.Database.Employees.AddAsync(new DataBase.Employee
                     {
-                        Id = Convert.ToInt32(data[0]),
-                        Name = data[1],
-                        Surename = data[2],
-                        Email = data[3],
-                        Phonenumber = data[4]
+                        Id = newEmployee.Id,
+                        Name = newEmployee.Name,
+                        Surename = newEmployee.Surename,
+                        Email = newEmployee.Email,
+                        Phonenumber = newEmployee.Phonenumber
                     });
                 }
+                await Task.WhenAll(tasks);
                 
             }
 
-            DataBaseLocator.Database.SaveChanges();
+            await Task.Run(() => DataBaseLocator.Database.SaveChanges());
         }
 
         public void EditEmployee()
@@ -95,20 +107,34 @@ namespace EmployeesList
             }
         }
 
-        public void DeleteEmployees()
+        public async void DeleteEmployeesAsync()
         {
-            foreach(EmployeeViewModel e in EmployeesList.Where(e => e.IsChecked == true).ToList())
+            List<int> idsToDelete = new List<int>();
+
+            foreach(EmployeeViewModel e in EmployeesList.Where(e => e.IsChecked == true))
+            {      
+                idsToDelete.Add(e.Id);
+            }
+
+            List<EmployeeViewModel> employeesListTmp = EmployeesList.ToList();
+            await Task.Run(() => employeesListTmp.RemoveAll(e => idsToDelete.Contains(e.Id)));
+
+            EmployeesList.Clear();
+            foreach(EmployeeViewModel e in employeesListTmp)
             {
-                EmployeesList.Remove(e);
-                var foundEntity = DataBaseLocator.Database.Employees.FirstOrDefault(emp => emp.Id == e.Id);
-                if(foundEntity != null)
+                EmployeesList.Add(e);
+            }
+
+            foreach(int id in idsToDelete)
+            {
+                var foundEntity = DataBaseLocator.Database.Employees.FirstOrDefault(emp => emp.Id == id);
+                if (foundEntity != null)
                 {
-                    DataBaseLocator.Database.Employees.Remove(foundEntity);
+                    await Task.Run(() => DataBaseLocator.Database.Employees.Remove(foundEntity));
                 }
             }
-            DataBaseLocator.Database.SaveChanges();
+            await Task.Run(() => DataBaseLocator.Database.SaveChanges());
         }
-
         public void AddEmployee()
         {
             AddEmployeeWindow add = new AddEmployeeWindow(EmployeesList);
@@ -137,7 +163,7 @@ namespace EmployeesList
                 {
                     csv.Append(Convert.ToString(e.Id) + ',' + e.Name + ',' + e.Surename + ',' + e.Email + ',' + e.Phonenumber + '\n');
                 }
-                File.WriteAllText(saveFileDialog.FileName, csv.ToString());
+                File.WriteAllTextAsync(saveFileDialog.FileName, csv.ToString());
             }
                 
         }
@@ -152,6 +178,7 @@ namespace EmployeesList
 
         private void SortByColumn(string name)
         {
+            EmployeeSelected = null;
             ObservableCollection<EmployeeViewModel> temp = new ObservableCollection<EmployeeViewModel>();
             switch (name)
             {
